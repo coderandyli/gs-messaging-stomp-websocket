@@ -31,6 +31,9 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class GreetingIntegrationTests {
 
+	/**
+	 * 随机生成一个端口
+	 */
 	@LocalServerPort
 	private int port;
 
@@ -57,9 +60,9 @@ public class GreetingIntegrationTests {
 		final AtomicReference<Throwable> failure = new AtomicReference<>();
 
 		StompSessionHandler handler = new TestSessionHandler(failure) {
-
 			@Override
 			public void afterConnected(final StompSession session, StompHeaders connectedHeaders) {
+				// subscribe message
 				session.subscribe("/topic/greetings", new StompFrameHandler() {
 					@Override
 					public Type getPayloadType(StompHeaders headers) {
@@ -79,6 +82,8 @@ public class GreetingIntegrationTests {
 						}
 					}
 				});
+
+				// send message
 				try {
 					session.send("/app/hello", new HelloMessage("Spring"));
 				} catch (Throwable t) {
@@ -88,6 +93,7 @@ public class GreetingIntegrationTests {
 			}
 		};
 
+		// 连接
 		this.stompClient.connect("ws://localhost:{port}/gs-guide-websocket", this.headers, handler, this.port);
 
 		if (latch.await(3, TimeUnit.SECONDS)) {
