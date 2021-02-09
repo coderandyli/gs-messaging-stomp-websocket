@@ -1,10 +1,13 @@
-package com.example.messagingstompwebsocket;
+package com.example.messagingstompwebsocket.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 @Configuration
 @EnableWebSocketMessageBroker // As its name suggests, @EnableWebSocketMessageBroker enables WebSocket message handling, backed by a message broker.
@@ -26,6 +29,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	}
 
 	/**
+	 * 与处理从 WebSocket 客户端接收和发送到 WebSocket 的消息相关的配置选项。
+	 *
+	 * @param registry STOMP 端点
+	 */
+	@Override
+	public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+		registry.addDecoratorFactory(new HttpWebSocketHandlerDecoratorFactory());
+	}
+
+	/**
 	 * 注册 STOMP 端点
 	 *
 	 * The registerStompEndpoints() method registers the /gs-guide-websocket endpoint,
@@ -37,7 +50,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	 */
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/gs-guide-websocket").withSockJS();
+		registry.addEndpoint("/gs-guide-websocket")
+				.addInterceptors(new HttpHandshakeInterceptor())
+				.setAllowedOriginPatterns("*")
+				.setHandshakeHandler(new HttpHandshakeHandler())
+				.withSockJS();
 	}
 
 }

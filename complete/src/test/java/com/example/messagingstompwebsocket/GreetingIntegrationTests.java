@@ -93,6 +93,8 @@ public class GreetingIntegrationTests {
 			}
 		};
 
+		System.out.println(this.port);
+
 		// 连接
 		this.stompClient.connect("ws://localhost:{port}/gs-guide-websocket", this.headers, handler, this.port);
 
