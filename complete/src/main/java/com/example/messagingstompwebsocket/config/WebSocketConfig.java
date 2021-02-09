@@ -22,7 +22,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void configureMessageBroker(MessageBrokerRegistry config) {
 		// 设置消息代理SimpleBroker；SimpleBroker：是一个基于内存的消息代理
 		// 在 Controller 类中的方法里面发生的消息，会首先转发到消息代理，从而发送到对应广播或者队列中。
-		//
 		config.enableSimpleBroker("/topic");
 		// 定义客户端发送消息前缀，该前缀会筛选消息目标转发到 Controller 类中@MessageMapping注解对应的方法里 eg：/app/hello
 		config.setApplicationDestinationPrefixes("/app");
