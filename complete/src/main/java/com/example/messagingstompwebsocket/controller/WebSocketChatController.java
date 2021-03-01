@@ -1,29 +1,62 @@
 package com.example.messagingstompwebsocket.controller;
 
 import com.example.messagingstompwebsocket.domain.WebSocketChatMessage;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
+
+import java.security.Principal;
 
 /**
  * @author lizhenzhen
  * @version 1.0
  * @date 2021/2/8 下午5:52
  */
+@Slf4j
 @Controller
 public class WebSocketChatController {
-    @MessageMapping("/chat.sendMessage")
+
+    @Autowired
+    private SimpMessageSendingOperations simpMessageSendingOperations;
+
     @SendTo("/topic/javainuse")
+    @MessageMapping("/chat.sendMessage")
     public WebSocketChatMessage sendMessage(@Payload WebSocketChatMessage webSocketChatMessage) {
         return webSocketChatMessage;
     }
-    @MessageMapping("/chat.newUser")
+
     @SendTo("/topic/javainuse")
+    @MessageMapping("/chat.newUser")
     public WebSocketChatMessage newUser(@Payload WebSocketChatMessage webSocketChatMessage,
                                         SimpMessageHeaderAccessor headerAccessor) {
         headerAccessor.getSessionAttributes().put("username", webSocketChatMessage.getSender());
         return webSocketChatMessage;
     }
+
+
+    /**
+     * @SendToUser
+     *  - broadcast：是否广播，默认为true
+     *
+     * @param webSocketChatMessage
+     * @return
+     */
+//    @SendToUser(destinations = "/topic/javainuse", broadcast = true)
+    @MessageMapping("/chat.sendMessage")
+    public WebSocketChatMessage testSendToUser(@Payload WebSocketChatMessage webSocketChatMessage,
+                                               Principal principal) {
+        String name = principal.getName();
+        System.out.println("【name】 = " + name);
+
+        simpMessageSendingOperations.convertAndSendToUser("", "/topic/javainuse", webSocketChatMessage);
+        return webSocketChatMessage;
+    }
+
+
 }

@@ -28,11 +28,15 @@ public class WebSocketChatEventListener {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String username = (String) headerAccessor.getSessionAttributes().get("username");
+
         if(username != null) {
+            System.out.println(username + " has left the chat");
+
             WebSocketChatMessage chatMessage = new WebSocketChatMessage();
             chatMessage.setType("Leave");
             chatMessage.setSender(username);
-            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+//            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+            messagingTemplate.convertAndSend("/topic/javainuse", chatMessage);
         }
     }
 }
