@@ -10,6 +10,8 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
 
@@ -39,24 +41,14 @@ public class WebSocketChatController {
         return webSocketChatMessage;
     }
 
-
-    /**
-     * @SendToUser
-     *  - broadcast：是否广播，默认为true
-     *
-     * @param webSocketChatMessage
-     * @return
-     */
-//    @SendToUser(destinations = "/topic/javainuse", broadcast = true)
-    @MessageMapping("/chat.sendMessage")
-    public WebSocketChatMessage testSendToUser(@Payload WebSocketChatMessage webSocketChatMessage,
-                                               Principal principal) {
-        String name = principal.getName();
-        System.out.println("【name】 = " + name);
-
-        simpMessageSendingOperations.convertAndSendToUser("", "/topic/javainuse", webSocketChatMessage);
-        return webSocketChatMessage;
+    @ResponseBody
+    @PostMapping("/sys-msg/send")
+    public void sendSysNoti() {
+        WebSocketChatMessage webSocketChatMessage = new WebSocketChatMessage();
+        webSocketChatMessage.setSender("sys");
+//        webSocketChatMessage.setType("sys-msg");
+        webSocketChatMessage.setType("message-data");
+        webSocketChatMessage.setContent("夜深了，天凉了，注意盖好被子...");
+        simpMessageSendingOperations.convertAndSend("/topic/javainuse", webSocketChatMessage);
     }
-
-
 }
